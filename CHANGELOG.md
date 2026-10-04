@@ -1,6 +1,23 @@
 # Changelog
 
 ## 0.8.0
+- `design` now starts before the ask is a feature. `shape.md` sizes it first -
+  probe, bounded or structural, on named signals (a schema change, a public
+  API, a new dependency, money or auth, anything a revert cannot undo) - and
+  scales the work to it: a probe gets a conversation and a throwaway
+  prototype, a bounded change a four-line design approved in the reply, a
+  structural change a design file. Before any approach it finds the intent one
+  question at a time - problem, success, bounds, fixed points - and restates a
+  request that names a solution as the problem behind it, so "don't build it"
+  can be an option. It offers a side-by-side sketch when a choice is easier to
+  see than read.
+- New script, `design/scripts/spec_check.py`: checks a design file before
+  approval for placeholders, missing or empty sections, success lines with
+  nothing to measure, a rollout with no way back, open questions with no owner,
+  and an approval that leaves a question open. What a script cannot see -
+  contradictions, untested failure modes, terms used before they are defined -
+  is a checklist in `shape.md`. Routing is unchanged (dev 98% top-1, legacy
+  100%); always-loaded text grew 7 tokens.
 - `ship/references/receipts.md` now covers the claim itself, not only the proof:
   a list of phrases that mean the command has not been run ("should work",
   "looks right", "I'm confident"), an excuse-and-reality table for the nine

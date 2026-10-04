@@ -223,7 +223,7 @@ Each skill opens with a short table of situations pointing to a single reference
 
 ### Scripts
 
-Sixteen scripts carry the deterministic work. Fourteen run standalone and print a compact summary; `mutate.py` and `backends.py` are imported by `loop.py` and `log_fetch.py`. The commands you invoke directly:
+Seventeen scripts carry the deterministic work. Fifteen run standalone and print a compact summary; `mutate.py` and `backends.py` are imported by `loop.py` and `log_fetch.py`. The commands you invoke directly:
 
 ```bash
 kubectl logs pod/api-7d9f --previous | python3 skills/debug/scripts/log_trace.py --repo .
@@ -231,6 +231,7 @@ python3 skills/debug/scripts/service_map.py .            # map services, clouds 
 python3 skills/debug/scripts/service_map.py . --okf      # export that map as an OKF bundle in docs/okf
 python3 skills/debug/scripts/log_fetch.py notification-service --since 2h
 python3 skills/legal-traps/scripts/legal_traps.py .
+python3 skills/design/scripts/spec_check.py docs/designs/2026-10-04-retry.md  # before asking for approval
 python3 skills/build/scripts/loop.py fast                # then focused, then full
 python3 skills/build/scripts/loop.py mutate              # inject bugs; report the ones no test catches
 python3 skills/build/scripts/tamper.py                   # catch skipped, deleted or weakened tests

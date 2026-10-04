@@ -11,7 +11,7 @@ rubric skills are installed. Before acting on a request, pick the skill that fit
 
 | Situation | Skill |
 | --- | --- |
-| New feature or behaviour change with nothing specced; an approved design that needs tasks | `design` |
+| A fuzzy idea or "could we…"; new feature or behaviour change with nothing specced; an approved design that needs tasks | `design` |
 | Writing or changing code; a plan exists; an isolated workspace is needed | `build` |
 | A task that takes several attempts, or an agent loop | `ratchet` |
 | Several independent tasks or failures; work big enough to split across subagents | `delegate` |
@@ -44,4 +44,4 @@ Install only what the work needs: `./install.sh --pack NAME`. If a task matches 
 4. Run `vibe-check` before every commit.
 5. Regulated data (health, payments, personal identifiers, money) means the matching `reg-` skill from the regulated pack applies on top of everything else.
 6. If the user explicitly says to skip a skill, skip it, and state in one line what risk that leaves.
-7. Save tokens: when a rubric script exists for the job (`loop`, `tamper`, `ratchet`, `team`, `log-fetch`, `log-trace`, `legal-traps`, `iac-check`, `crd-check`, `drift`, `deps-check`, `vibe-check`), run it and read its summary instead of reading raw logs, manifests or whole files.
+7. Save tokens: when a rubric script exists for the job (`loop`, `tamper`, `ratchet`, `team`, `log-fetch`, `log-trace`, `legal-traps`, `iac-check`, `crd-check`, `drift`, `deps-check`, `vibe-check`, `spec-check`), run it and read its summary instead of reading raw logs, manifests or whole files.
