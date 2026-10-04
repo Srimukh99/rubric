@@ -1,6 +1,29 @@
 # Changelog
 
 ## 0.8.0
+- Review settles the facts before anyone reads the diff. New script,
+  `review/scripts/review_pack.py`: with the plan, it checks every planned file
+  changed and nothing else, every planned interface defined at HEAD with the
+  planned parameters, and every test the plan wrote still there and unchanged
+  (compared as syntax, so reformatting is not a change); it runs `vibe_check`
+  and `tamper` over the range; and it writes one file with those findings on
+  top, then the tasks in scope, the commits and the diff. Range guards refuse
+  an empty range or a base that is not an ancestor.
+- `second-look.md` is now a brief for an independent reviewer: package path,
+  plan and constraints only; read every hunk; change nothing; spawn no
+  reviewers; judge silence in the plan by what a reasonable user expects;
+  report a verdict, findings with file, line, why and fix, what was set aside,
+  and what the diff cannot show. `weigh-in.md` reads every comment before
+  acting, asks about the unclear ones first, checks "do it properly" against
+  real callers, and replies with the change, not with agreement.
+- `delegate` reviews each worker before it lands: the package first (its
+  FAILs go back without spending a reviewer), then a capped fix loop - two
+  rounds with the same worker, a third with a fresh one, then a ruling on
+  each open finding, written to `.rubric/ledger.md`. `build` runs the package
+  after every task.
+- New eval, `evals/review_eval.py`: the plan_eval fixture, implemented cold.
+  The clean range gives no findings; 9 of 9 planted implementation defects
+  are named before a reviewer reads the diff.
 - `design/references/blueprint.md` is now a plan someone who has never seen the
   repo can execute, not interpret: a file map with one responsibility per
   file, then tasks that carry what they cover in the design, their files, the
