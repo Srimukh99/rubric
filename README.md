@@ -329,7 +329,7 @@ Script paths moved with their skills: `skills/prove-it/scripts/loop.py` is now `
 
 ## Contributing
 
-1. Read `skills/forge/SKILL.md`, which defines the format and the standard for proving a skill helps.
+1. Read `skills/forge/references/library.md`, which defines the format and the standard for proving a skill helps.
 2. One skill per pull request, with the three should-trigger and two should-not prompts you tested in the description.
 3. CI must pass: skill lint, layout check, unit tests, the gate, and the evals.
 4. Core stays at 14 skills or fewer. A new specialist skill belongs in a pack under `packs/NAME/skills/`; a new job inside an existing skill belongs in its `references/` directory.
