@@ -14,4 +14,6 @@ Nothing is built until the user approves a design. Read only the part you need.
 
 Order: `references/shape.md`, then `references/blueprint.md` once a structural design is approved. A bounded change goes from its four-line design straight to `build`. Skip shape when a design already exists.
 
-Script: `scripts/spec_check.py` (checks a design file for placeholders, missing sections and unmeasurable success before approval).
+Pictures: `references/sketch.md`, when a question is easier to see than read (options side by side, call order, states, data, screen layout), in Mermaid.
+
+Script: `scripts/spec_check.py` (checks a design file before approval: placeholders, missing sections, unmeasurable success, wording that reads two ways, and Mermaid that will not render).

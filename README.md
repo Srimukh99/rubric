@@ -129,7 +129,7 @@ design → build (ratchet, delegate) → review → ship
 something breaks: debug (logs → source line → cause → fix)        outage: firefight
 ```
 
-1. **design** — Activates on a feature or behaviour change with nothing specced. Turns the ask into an agreed design, then into tasks small enough to verify, each with exact files and checks.
+1. **design** — Activates on a fuzzy idea, or a feature or behaviour change with nothing specced. Sizes the ask first — probe, bounded or structural — and scales the work to it: a conversation, a four-line design, or a design file that `spec_check.py` checks before you approve it. Draws in Mermaid when a choice is easier to see than read. Then breaks the work into tasks small enough to verify, each with exact files and checks.
 
 2. **build** — Activates once a plan exists. Creates an isolated worktree, runs a test-first loop built for agent speed, and escalates checks in tiers: typecheck and lint on every edit, related tests when those pass, the full suite before done.
 

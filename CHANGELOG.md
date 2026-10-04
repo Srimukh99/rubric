@@ -9,12 +9,24 @@
   structural change a design file. Before any approach it finds the intent one
   question at a time - problem, success, bounds, fixed points - and restates a
   request that names a solution as the problem behind it, so "don't build it"
-  can be an option. It offers a side-by-side sketch when a choice is easier to
-  see than read.
+  can be an option. Its write-back keeps "you said" apart from "I'm assuming",
+  and nothing assumed counts as agreed until the user has seen it. An ask
+  holding several independent parts is split before any detail question; a
+  new project is never bounded; sizes only go up mid-task; and one yes
+  approves one stage, not the documents that follow it.
+- New reference, `design/references/sketch.md`: when a question is easier to
+  see than read, and which Mermaid diagram answers it - options side by side,
+  calls in order with the failure path, states, data - with an ASCII sketch
+  for screen layouts. Every example renders in the real Mermaid renderer.
 - New script, `design/scripts/spec_check.py`: checks a design file before
   approval for placeholders, missing or empty sections, success lines with
   nothing to measure, a rollout with no way back, open questions with no owner,
-  and an approval that leaves a question open. What a script cannot see -
+  an approval that leaves a question open, and Mermaid that will not render or
+  will not draw what was written. It warns on wording that reads two ways
+  ("etc.", "and/or", "gracefully") and on a structural design with no diagram.
+  Against the real renderer, on 28 diagrams (the examples and mutations of
+  them), the lint missed none of the 18 broken ones; it also fails two that
+  Mermaid accepts, both `[* --> a`, which Mermaid draws as a box labelled "[*". What a script cannot see -
   contradictions, untested failure modes, terms used before they are defined -
   is a checklist in `shape.md`. Routing is unchanged (dev 98% top-1, legacy
   100%); always-loaded text grew 7 tokens.

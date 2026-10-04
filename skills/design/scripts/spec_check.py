@@ -3,8 +3,16 @@
 
 Checks a design written from the template in references/shape.md: the size and
 status lines, every section the size needs, placeholders left in, success lines
-with nothing to measure, a rollout with no way back, and open questions with no
-owner. Exit 1 on FAIL.
+with nothing to measure, a rollout with no way back, open questions with no
+owner, and Mermaid blocks that will not render. WARNs on wording that reads two
+ways and on a structural design with no diagram. Exit 1 on FAIL.
+
+The Mermaid lint is a floor, not a parser. It FAILs what will not render, or
+will not draw what was written: an unknown diagram type, unbalanced brackets,
+braces or quotes, a block opened without its `end`, a placeholder inside a
+diagram, a sequence message with no text. (Mermaid draws `[* --> a` without
+complaint, as a box labelled "[*" instead of the start marker.) The real
+renderer catches more.
 
 What it cannot check - contradictions, coverage, terms used before they are
 defined - is listed in shape.md for a human read. This only clears the floor.
@@ -18,12 +26,28 @@ import sys
 
 SIZES = ("probe", "bounded", "structural")
 REQUIRED = {
-    "structural": ["Problem", "Success", "Non-goals", "Approaches considered", "Data model", "Interfaces",
+    "structural": ["Problem", "Success", "Non-goals", "Assumptions", "Approaches considered", "Data model", "Interfaces",
                    "Flow", "Failure modes", "Testing", "Rollout and undo", "Open questions"],
     "bounded": ["Problem", "Success", "Testing", "Rollout and undo"],
     "probe": ["Problem"],
 }
-MAY_BE_EMPTY = {"Open questions"}
+MAY_BE_EMPTY = {"Open questions", "Assumptions"}
+# Words that let two engineers build two different things.
+TWO_READINGS = re.compile(r"\betc\b\.?|\band/or\b|\bas (?:needed|appropriate|required)\b|\bif possible\b|"
+                          r"\bwhere (?:possible|needed)\b|\bappropriate(?:ly)?\b|\bgracefully\b|\bproperly\b|"
+                          r"\breasonabl[ey]\b|\bsufficient(?:ly)?\b|\bvarious\b|\bsome kind of\b", re.I)
+TWO_READINGS_IN = ("Success", "Interfaces", "Data model", "Flow", "Failure modes", "Testing", "Rollout and undo")
+MERMAID_TYPES = ("flowchart", "graph", "sequenceDiagram", "stateDiagram", "stateDiagram-v2", "erDiagram",
+                 "classDiagram", "gantt", "journey", "pie", "mindmap", "timeline", "gitGraph", "quadrantChart",
+                 "requirementDiagram", "C4Context", "C4Container", "C4Component", "C4Dynamic", "C4Deployment",
+                 "sankey-beta", "xychart-beta", "block-beta", "packet-beta", "architecture-beta", "kanban", "radar-beta")
+# Blocks closed by a line reading `end`, per diagram type.
+BLOCK_OPENERS = {"sequenceDiagram": r"alt|opt|loop|par|critical|break|rect|box",
+                 "flowchart": r"subgraph", "graph": r"subgraph"}
+CARDINALITY = re.compile(r"[|}][|o](?:--|\.\.)[o|][|{]")
+SEQ_ARROW = re.compile(r"^\s*[\w\s\"]+?\s*(?:-->>|->>|-->|->|--x|-x|--\)|-\))[+-]?\s*[\w\"]")
+SEQ_KEYWORD = re.compile(r"^\s*(?:participant|actor|alt|else|opt|loop|par|and|critical|break|rect|end|note|"
+                         r"activate|deactivate|autonumber|box|create|destroy|title|%%)\b", re.I)
 PLACEHOLDER = re.compile(r"\b(?:TBD|TODO|FIXME|XXX|TBC)\b|\?\?\?|<[a-z][a-z0-9 _/.-]{0,40}>|\blorem ipsum\b", re.I)
 MEASURABLE = re.compile(r"\d|`[^`]+`|\btests?\b|\bassert", re.I)
 VAGUE = re.compile(r"\b(?:fast(?:er)?|robust|scalable|seamless(?:ly)?|user.friendly|better|improved|"
@@ -67,6 +91,75 @@ def bullets(body):
     """Bullet or numbered items, or the paragraph lines when there are none."""
     items = [(i, t) for i, t in body if re.match(r"^(?:[-*+]|\d+[.)])\s+", t)]
     return items or [(i, t) for i, t in body if not t.startswith("|") and not t.startswith("```")]
+
+
+def mermaid_blocks(raw):
+    """[(line number of the opening fence, [(lineno, text), ...])] for ```mermaid blocks."""
+    blocks, current = [], None
+    for i, line in enumerate(raw, 1):
+        fence = line.strip()
+        if current is None and re.match(r"^```\s*mermaid\b", fence):
+            current = (i, [])
+        elif current is not None and fence.startswith("```"):
+            blocks.append(current)
+            current = None
+        elif current is not None:
+            current[1].append((i, line))
+    if current is not None:
+        blocks.append(current)
+    return blocks
+
+
+def lint_mermaid(start, body):
+    """FAIL lines for one Mermaid block: what will not render, will not draw what was written, or is unfinished."""
+    out = []
+    lines = [(i, l) for i, l in body if l.strip() and not l.strip().startswith("%%")]
+    if not lines:
+        return [(start, "empty Mermaid block")]
+    kind = lines[0][1].split()[0]
+    if kind not in MERMAID_TYPES:
+        out.append((lines[0][0], f"unknown Mermaid diagram type: {kind}"))
+    pairs = {"(": ")", "[": "]"}
+    braces = 0     # {} may span lines: entity and class bodies
+    for i, line in lines:
+        if line.count('"') % 2:
+            out.append((i, "unbalanced quote in Mermaid line"))
+            continue
+        # Quoted text is a label, and ||--o{ is cardinality, not a bracket.
+        bare = CARDINALITY.sub(" ", re.sub(r'"[^"]*"', "", line))
+        braces += bare.count("{") - bare.count("}")
+        stack, bad = [], False
+        for ch in bare:
+            if ch in pairs:
+                stack.append(pairs[ch])
+            elif ch in pairs.values():
+                if not stack or stack.pop() != ch:
+                    bad = True
+                    break
+        if bad or stack:
+            out.append((i, "unbalanced brackets in Mermaid line"))
+        m = PLACEHOLDER.search(re.sub(r"<[a-z][a-z0-9 _/.-]{0,40}>", "", line))
+        if m:
+            out.append((i, f"placeholder left in a diagram: {m.group(0)}"))
+        if kind == "sequenceDiagram" and SEQ_ARROW.match(line) and not SEQ_KEYWORD.match(line) and ":" not in line:
+            out.append((i, "sequence message with no text (add ': <what is sent>')"))
+    if braces:
+        out.append((start, "unbalanced braces in Mermaid block"))
+    opener = BLOCK_OPENERS.get(kind)
+    if opener:
+        depth = 0
+        for i, line in lines[1:]:
+            word = line.split()[0] if line.split() else ""
+            if re.fullmatch(opener, word):
+                depth += 1
+            elif word == "end":
+                depth -= 1
+                if depth < 0:
+                    out.append((i, "'end' with no block to close"))
+                    depth = 0
+        if depth > 0:
+            out.append((start, f"{depth} block(s) opened with no 'end'"))
+    return out
 
 
 def check(path):
@@ -123,6 +216,19 @@ def check(path):
     if "Rollout and undo" in found and found["Rollout and undo"]:
         if not any(UNDO.search(t) for _, t in found["Rollout and undo"]):
             add("FAIL", starts["Rollout and undo"], "rollout says how to ship, not how to undo")
+
+    for name in TWO_READINGS_IN:
+        for i, text in found.get(name, []):
+            for m in TWO_READINGS.finditer(re.sub(r"`code`", "", text)):
+                add("WARN", i, f"reads two ways in ## {name}: '{m.group(0)}' - say which")
+
+    blocks = mermaid_blocks(raw)
+    for start, body in blocks:
+        for i, msg in lint_mermaid(start, body):
+            add("FAIL", i, msg)
+    if size == "structural" and not blocks:
+        add("WARN", 0, "no diagram: a flow with three or more parts, or states, reads better drawn "
+                       "(references/sketch.md)")
 
     open_items = [(i, t) for i, t in found.get("Open questions", []) if not NONE.match(t)]
     for i, text in bullets(open_items):
