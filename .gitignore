@@ -5,3 +5,4 @@ __pycache__/
 .rubric/state.jsonl
 .rubric/services.json
 .DS_Store
+.rubric/review/

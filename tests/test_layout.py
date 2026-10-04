@@ -23,10 +23,10 @@ class Layout(unittest.TestCase):
         r = self.copy(); p = r / 'skills' / 'delegate' / 'SKILL.md'; p.write_text(p.read_text() + '\nRun `hunt` first.\n')
         self.assertTrue(any('retired skill `hunt`' in e for e in CL.run(r)[0]))
     def test_detects_unreachable_script(self):
-        r = self.copy(); (r / 'skills' / 'review' / 'scripts').mkdir(); (r / 'skills' / 'review' / 'scripts' / 'orphan.py').write_text('x = 1\n')
+        r = self.copy(); (r / 'skills' / 'review' / 'scripts').mkdir(exist_ok=True); (r / 'skills' / 'review' / 'scripts' / 'orphan.py').write_text('x = 1\n')
         self.assertTrue(any('orphan.py is never mentioned' in e for e in CL.run(r)[0]))
     def test_detects_duplicate_script(self):
-        r = self.copy(); (r / 'skills' / 'review' / 'scripts').mkdir(); (r / 'skills' / 'review' / 'scripts' / 'loop.py').write_text('x = 1\n')
+        r = self.copy(); (r / 'skills' / 'review' / 'scripts').mkdir(exist_ok=True); (r / 'skills' / 'review' / 'scripts' / 'loop.py').write_text('x = 1\n')
         self.assertTrue(any('exists in both' in e for e in CL.run(r)[0]))
     def test_detects_dangling_path(self):
         r = self.copy(); p = r / 'AGENTS.md'; p.write_text(p.read_text() + '\nRun skills/nope/scripts/x.py\n')

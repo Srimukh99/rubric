@@ -223,7 +223,7 @@ Each skill opens with a short table of situations pointing to a single reference
 
 ### Scripts
 
-Nineteen scripts carry the deterministic work. Seventeen run standalone and print a compact summary; `mutate.py` and `backends.py` are imported by `loop.py` and `log_fetch.py`. The commands you invoke directly:
+Twenty scripts carry the deterministic work. Eighteen run standalone and print a compact summary; `mutate.py` and `backends.py` are imported by `loop.py` and `log_fetch.py`. The commands you invoke directly:
 
 ```bash
 kubectl logs pod/api-7d9f --previous | python3 skills/debug/scripts/log_trace.py --repo .
@@ -238,6 +238,7 @@ python3 skills/design/scripts/plan_check.py docs/plans/2026-10-04-retry.md --red
 python3 skills/build/scripts/loop.py fast                # then focused, then full
 python3 skills/build/scripts/loop.py mutate              # inject bugs; report the ones no test catches
 python3 skills/build/scripts/tamper.py                   # catch skipped, deleted or weakened tests
+python3 skills/review/scripts/review_pack.py --plan docs/plans/2026-10-04-retry.md  # facts first, then the diff
 python3 skills/ratchet/scripts/ratchet.py start --goal "..." --scope 'src/x/**' --target tests/test_x.py::test_y
 python3 skills/ratchet/scripts/ratchet.py check          # ACCEPT / REJECT / STALL / DONE
 python3 skills/delegate/scripts/team.py init --goal "..." --contract tests/contract

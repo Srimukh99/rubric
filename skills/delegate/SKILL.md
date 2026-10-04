@@ -27,9 +27,23 @@ brief yourself.
 5. **Verify, don't trust.** `team.py verify` runs each worker's ratchet and compares its claim with the
    verdict. Only DONE counts. Send a REJECT or FALSE CLAIM back with its reason (the worker continues in
    its worktree), or start it over with `team.py spawn NAME --fresh`.
-6. **Integrate.** `team.py integrate` merges the verified workers in a scratch worktree and runs the
+6. **Integrate** only reviewed workers (steps 7-9). `team.py integrate` merges the verified workers in a scratch worktree and runs the
    whole suite once. `team.py integrate --apply` lands it in your working tree.
-7. **Next wave.** Re-plan with what you learned, `team.py add`, `team.py spawn`, repeat.
+7. **Review each worker before it lands.** For a DONE worker, run
+   `python3 skills/review/scripts/review_pack.py --base <its start> --plan <plan> --task N` in its
+   worktree and hand a fresh reviewer the file it prints, briefed as the `review` skill's second-look says.
+   A FAIL in the package goes straight back to the worker; no reviewer is spent on it.
+8. **Fix loop, with a cap.** Blockers and Should-fixes go back as a list. Rounds 1-2: the same worker
+   fixes, re-runs the covering tests, and the reviewer re-checks only the fix range and the open
+   findings. Round 3: a fresh worker, on a stronger model if you can pick, owns the task and reads what
+   was tried. After round 3, stop and rule on each open finding yourself: wrong or contestable, park it;
+   real but nothing builds on it, park it as deferred; real and load-bearing, decide the smallest change
+   that unblocks the next task. Nits never enter the loop; they go to the final review.
+9. **Ledger.** Every ruling and parked finding is one line in `.rubric/ledger.md`:
+   `Task N: <finding> - Ruling: <what you decided> - <what it costs if wrong>`. Keep going on rulings;
+   stop only for something irreversible, security-sensitive, outside the worktree (a push, a merge), or
+   a plan so wrong that every path is a guess. The final whole-branch review reads the ledger.
+10. **Next wave.** Re-plan with what you learned, `team.py add`, `team.py spawn`, repeat.
    `team.py clean --all` removes worktrees, branches and the plan at the end.
 
 ## Rules

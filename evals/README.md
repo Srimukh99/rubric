@@ -5,7 +5,7 @@ not agent behaviour: the cheating diffs and agent mistakes are scripted.
 
 | Eval | Run | Result at v0.7 |
 | --- | --- | --- |
-| Layout integrity | `python3 tools/check_layout.py` | 19 scripts each in one skill and mentioned; no dangling path or retired name |
+| Layout integrity | `python3 tools/check_layout.py` | 20 scripts each in one skill and mentioned; no dangling path or retired name |
 | Routing, v0.5 layout vs v0.6 layout | `python3 evals/routing.py` (add `--held-out` once, never tune on it) | dev 90% to 98% top-1, 100% top-3; every v0.5 trigger still routes (100%) |
 | Delegation: trust vs old rules vs contract-first | `python3 evals/delegation.py` (`-v` for the full log) | original contract tests passing 2 / 7 / 8 of 8; bad changes landed 4 / 1 / 0 |
 | Tamper guard | `python3 evals/tamper_guard.py` | 19 of 19 cheats flagged (15 as FAIL); 0 of 12 honest changes failed |
@@ -13,6 +13,7 @@ not agent behaviour: the cheating diffs and agent mistakes are scripted.
 | ratchet vs naive gate | `python3 evals/ratchet_vs_naive.py` | ratchet 7 of 7 correct; naive gate 2 of 7 |
 | Guidance coverage and defect reachability | `python3 evals/guidance_coverage.py` | rubric 6/6 core, 2/4 extended, 10/10 defects reachable; superpowers 2/6, 1/4, 3/10 |
 | Code quality: does a green suite mean correct code? | `python3 evals/code_quality.py` (`-v` to name each hidden failure) | 6 of 6 candidates pass their own suite; 3 are wrong; 10 hidden defects would have shipped. Mutation score does **not** separate them |
+| Review pack: what no reviewer has to find by reading | `python3 evals/review_eval.py` (`-v` for every finding) | the clean implementation of a plan gives 0 findings; 9 of 9 planted defects named (interface renamed or re-parameterised, planned test renamed or changed, file outside the plan, planned file untouched, test skipped, secret, debugger) |
 | Plan check: would a cold executor be stopped? | `python3 evals/plan_eval.py` (`-v` for every finding) | 19 of 19 planted plan defects caught, each for its own reason; the clean plan passes, its tests are red before their code, and executed cold all 3 PASS commands pass |
 | Flake finder: the earlier test that breaks another | `python3 evals/flake_finder.py` (`-v` for every case) | `flake.py` right on 75 of 75 cases in 544 runs; one test at a time, 60 of 75 in 4,950. At 256 tests: 11 runs vs 140 for one polluter, and every pair found |
 | Claim guard: unproven "done" claims, named vs. stopped | `python3 evals/claim_guard.py` (`--lib NAME=PATH` to score another library) | Stop hook stops 16 of 19 (9 of the first 12); 0 of 6 honest closings blocked, no loop |
@@ -114,6 +115,20 @@ six fixed.
 
 Concurrency and locale were deliberately left out of rubric's table rather
 than added to raise the score; `prove-it.md` states why in the file.
+
+## Review pack: facts before judgement
+
+`review_eval.py` commits the plan from `plan_eval.py`, implements it the way a
+cold agent would, and requires the clean range to give zero findings. Then it
+plants one implementation defect at a time and requires `review_pack.py` to
+name it. The first run caught 6 of 9, and each miss changed the tool or the
+fixture rather than the score: compiled `.pyc` files were being searched for
+definitions; a weakened assertion in a test that is new in the range is only
+a WARN for `tamper`, which has no earlier version to compare - but the plan
+wrote that test, so `review_pack` now compares each planned test's syntax
+tree with the plan's and FAILs any change; and the fixture lacked a
+`.gitignore`, so the clean control was not clean. Defects written with the
+tool make this a floor.
 
 ## Plan check: what a cold executor would trip over
 

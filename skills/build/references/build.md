@@ -23,6 +23,13 @@ After every 3 tasks, post a checkpoint: what changed, verify output, anything su
 
 Stop and say so if a file, API or behaviour isn't what the plan assumed. Never quietly change the plan. Update the plan file with the change and the reason, then re-run `plan_check.py` on it: a change to one task's `Produces` breaks every task that consumes it, and the check lists them.
 
+## Review as you go
+
+After each task, `python3 skills/review/scripts/review_pack.py --base <task start> --plan <plan> --task N`
+settles the facts in seconds: a planned interface missing, a test changed, a file outside the plan.
+Fix its FAILs before the next task, while the code is fresh. The judgement review (`review`) runs on
+the whole branch at the end.
+
 ## Done when
 
 All tasks are ticked, `loop.py full` passes and `tamper.py` is clean. Next: `review`, then `ship`.
