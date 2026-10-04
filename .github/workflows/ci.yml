@@ -66,5 +66,7 @@ jobs:
         run: python3 evals/code_quality.py
       - name: Guidance coverage - does the advice name the defect classes
         run: python3 evals/guidance_coverage.py --quiet
+      - name: Flake finder - the earlier test that breaks another, in few runs
+        run: python3 evals/flake_finder.py --sizes 16,64 --seeds 2
       - name: Claim guard - unproven claims named vs. stopped by the Stop hook
         run: python3 evals/claim_guard.py --quiet
