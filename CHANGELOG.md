@@ -1,6 +1,26 @@
 # Changelog
 
 ## 0.8.0
+- `forge` now builds a skill the way the library builds code: decide whether it
+  is a script, an `AGENTS.md` line or a skill; write the description as a
+  condition in the words people type; match the form to the observed failure
+  (a skipped rule, the wrong shape, a missing part, a condition); prove the
+  triggers, the routing and, where agents can be run, the behaviour. Its format
+  section now describes the library as it is.
+- New script, `forge/scripts/skill_check.py`: routes each changed skill's
+  trigger prompts from the new `evals/skill_triggers.json` (3 should, 2 should
+  not, all 28 skills), FAILs any dev or legacy routing case a change breaks
+  against the base, flags agent-specific tool names, WARNs on length and on
+  "what it does" sentences, and reports the always-loaded token change. CI runs
+  it on every skill.
+- Measured, then decided: deleting the "what it does" sentence from seven
+  descriptions saved 14% of always-loaded tokens but cut dev routing from 98% to
+  88%; recast as conditions it reached 100% on dev, and the one held-out run
+  showed part routing falling from 85% to 77%. That was fitting the dev set, so
+  every one of those edits was reverted. The 140 new trigger prompts then found
+  two real misroutes and two weak ranks; four small edits fixed them, dev top-1
+  98% to 100%, legacy 100%, held-out top-1 unchanged and top-3 90% to 93%, for
+  14 more always-loaded tokens.
 - Review settles the facts before anyone reads the diff. New script,
   `review/scripts/review_pack.py`: with the plan, it checks every planned file
   changed and nothing else, every planned interface defined at HEAD with the

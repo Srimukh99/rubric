@@ -1,6 +1,6 @@
 ---
 name: design
-description: Use when an idea is still fuzzy, or asked to build a feature or change behaviour and nothing is specced yet, or when an approved design needs breaking into small tasks with exact files, tests and proof commands. Works out what to build before any code.
+description: Use when an idea is still fuzzy or rough, or asked to build a feature or change behaviour and nothing is specced yet, or when an approved design needs breaking into small tasks with exact files, tests and proof commands. Works out what to build before any code.
 ---
 
 # design

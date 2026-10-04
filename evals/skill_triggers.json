@@ -1,0 +1,171 @@
+{
+  "note": "Per skill: prompts a user might type that should reach it, and near-misses that should not. Written fresh for each skill, never copied from routing_cases.json held_out. skills/forge/scripts/skill_check.py routes them.",
+  "boot": {
+    "should": ["New session in this repo, which rubric skill applies to what I'm about to do?",
+               "Starting a coding task here, route me to the right skill first",
+               "Before I begin work in this repository, pick the skill for the job"],
+    "should_not": ["The login test fails with a KeyError", "Deploy the new build to production"]
+  },
+  "build": {
+    "should": ["Implement the approved plan task by task in a fresh worktree",
+               "Write the code for this bug fix test-first",
+               "Refactor the pricing module without breaking behaviour, tests first"],
+    "should_not": ["Figure out what we should build for offline mode", "Review this pull request before merge"]
+  },
+  "debug": {
+    "should": ["The app crashes with a NullPointerException in production, help me find why",
+               "This test fails intermittently on CI and passes locally",
+               "Here's a stack trace from CloudWatch, where in our code does it come from?"],
+    "should_not": ["Add a new endpoint for exporting invoices", "Set up an SLO and alerts for the payments API"]
+  },
+  "delegate": {
+    "should": ["Split these five independent tasks across subagents",
+               "Several unrelated test failures, farm them out in parallel",
+               "This plan is big enough to hand pieces to multiple workers"],
+    "should_not": ["Fix this one failing test", "Write a design for the export feature"]
+  },
+  "deps-check": {
+    "should": ["We're bumping lodash and requests, any known CVEs?",
+               "Audit our Python and npm dependencies for vulnerable packages before release",
+               "Is this new container base image safe from a supply-chain point of view?"],
+    "should_not": ["Our query against the orders table is slow", "Write unit tests for the cart"]
+  },
+  "design": {
+    "should": ["I have a rough idea for team workspaces, can we think it through before coding?",
+               "Product wants CSV import; nothing is specced, what should we build?",
+               "The design is approved, now break it into small tasks with files and tests"],
+    "should_not": ["The build is red after my last commit", "Roll back yesterday's deploy"]
+  },
+  "firefight": {
+    "should": ["Production is down and customers can't check out",
+               "PagerDuty alert: error rate spiked to 40% on the API",
+               "Write the postmortem for last night's outage"],
+    "should_not": ["Add logging to the new worker", "Upgrade our Kubernetes cluster to 1.30"]
+  },
+  "forge": {
+    "should": ["Create a new rubric skill for database backups",
+               "Edit the rubric review skill's description so it triggers better",
+               "I want to add a skill to this library; what's the format?"],
+    "should_not": ["Review my code changes", "Design a new caching layer"]
+  },
+  "iac-check": {
+    "should": ["Review this Terraform for security misconfigurations",
+               "Is this Dockerfile and Helm chart safe to ship?",
+               "Check our CloudFormation template for public buckets and open security groups"],
+    "should_not": ["The checkout page is slow", "Our pods are stuck in CrashLoopBackOff"]
+  },
+  "legal-traps": {
+    "should": ["We're launching signup with email marketing and a subscription plan",
+               "Adding analytics and a Hotjar script to our consumer app",
+               "Users can upload files and we send SMS reminders; what could get us sued?"],
+    "should_not": ["Fix the race condition in the job queue", "Speed up the Snowflake report"]
+  },
+  "observe": {
+    "should": ["This new queue consumer has no metrics or alerts yet",
+               "Define SLIs and an error budget for the search API",
+               "Write runbooks and alerts for the payments service"],
+    "should_not": ["The site is down right now", "Write tests for the parser"]
+  },
+  "ratchet": {
+    "should": ["This fix keeps failing after several attempts, keep only steps that improve it",
+               "Run an agent loop on this feature without regressions creeping in",
+               "Iterate on the parser over many tries but never lose passing tests"],
+    "should_not": ["Plan the tasks for the new billing feature", "Deploy the release to staging"]
+  },
+  "review": {
+    "should": ["The feature is finished, review the diff before I merge",
+               "I got review comments on my PR, which ones should I accept?",
+               "This change touches login sessions and file uploads; check it for security holes"],
+    "should_not": ["Write the code for the export task", "Production is down"]
+  },
+  "ship": {
+    "should": ["About to commit and push this branch",
+               "I'm going to tell the team the bug is fixed",
+               "Release the migration to production and watch the health checks"],
+    "should_not": ["Why does this test fail only on CI?", "Sketch the architecture for the new service"]
+  },
+  "agent-tools": {
+    "should": ["Design the tools for our MCP server so the agent picks the right one",
+               "Our agent keeps calling the wrong function and loops",
+               "Building function-calling tools for an AI assistant"],
+    "should_not": ["Choose between REST and GraphQL for the public API", "Our Postgres query is slow"]
+  },
+  "api-pick": {
+    "should": ["Should our new public API be REST, GraphQL or gRPC?",
+               "Design the endpoints for the orders service",
+               "Review this API contract for breaking changes and safety"],
+    "should_not": ["The agent picks the wrong tool", "Index this MongoDB collection"]
+  },
+  "dbx-perf": {
+    "should": ["Our Databricks job is slow and costs too much",
+               "Spark executors keep getting lost with out-of-memory errors",
+               "Tune these Delta tables for faster reads"],
+    "should_not": ["Snowflake warehouse costs are high", "Postgres migration on a live table"]
+  },
+  "mongo-index": {
+    "should": ["This MongoDB aggregation is slow and explain shows COLLSCAN",
+               "Design indexes for our Mongo orders collection",
+               "Mongo query does an in-memory sort, how do I fix it?"],
+    "should_not": ["Postgres EXPLAIN shows a seq scan", "Spark job out of memory"]
+  },
+  "pg-explain": {
+    "should": ["This Postgres query takes 4 seconds, read the plan and fix it",
+               "Endpoint is slow because of a SQL query on a big table",
+               "Adding a query against a 50 million row Postgres table"],
+    "should_not": ["Add a column to a live Postgres table", "MongoDB aggregation is slow"]
+  },
+  "pg-migrate": {
+    "should": ["Add a NOT NULL column to the users table without downtime",
+               "Rename a column on a Postgres database serving live traffic",
+               "Drop an index and add a constraint in production Postgres"],
+    "should_not": ["This SQL query is slow", "Snowflake clustering keys"]
+  },
+  "snow-perf": {
+    "should": ["Our Snowflake query is slow and expensive",
+               "The Snowflake warehouse bill doubled this month",
+               "Tune clustering and warehouse size in Snowflake"],
+    "should_not": ["Databricks Spark job is slow", "Postgres plan shows nested loops"]
+  },
+  "crd-check": {
+    "should": ["Validate our Kubernetes CustomResourceDefinitions before release",
+               "We wrote an operator with custom resources; check them against the schema",
+               "Upgrading the cluster; are any of our manifests using removed APIs?"],
+    "should_not": ["Pods are stuck in ImagePullBackOff", "Terraform security review"]
+  },
+  "drift": {
+    "should": ["Does what's running in the cluster match what's in git?",
+               "Someone changed infrastructure by hand; find the drift",
+               "After the deploy, compare desired state to live state"],
+    "should_not": ["Write a new Helm chart", "Our pod keeps getting OOMKilled"]
+  },
+  "k8s-triage": {
+    "should": ["Pods are in CrashLoopBackOff after the rollout",
+               "Kubernetes deployment stuck, pods Pending",
+               "Readiness probes failing and the service returns 503 on EKS"],
+    "should_not": ["Validate our CRDs before upgrading", "Is git in sync with the cluster?"]
+  },
+  "reg-audit": {
+    "should": ["We need an audit trail of who changed what for SOX",
+               "Change control and audit logging for our healthcare system",
+               "SOC 2 asks us to prove who did what and when"],
+    "should_not": ["Store card numbers safely", "Calculate interest on balances"]
+  },
+  "reg-money": {
+    "should": ["Calculate refunds and fees on invoices",
+               "Store account balances and move money between ledgers",
+               "Handle currency conversion and tax on prices"],
+    "should_not": ["Checkout form collects card numbers", "Patient lab results in logs"]
+  },
+  "reg-pci": {
+    "should": ["Our checkout form handles card numbers and CVV",
+               "Tokenize payment cards before storing them",
+               "This service is in PCI DSS scope"],
+    "should_not": ["Compute interest on loans", "Audit trail for SOX"]
+  },
+  "reg-phi": {
+    "should": ["We process patient records and diagnoses",
+               "Lab results and prescriptions flow through this API",
+               "Is this HIPAA-covered system logging health data?"],
+    "should_not": ["Store card numbers", "Ledger for account balances"]
+  }
+}

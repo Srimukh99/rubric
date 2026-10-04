@@ -5,7 +5,7 @@ not agent behaviour: the cheating diffs and agent mistakes are scripted.
 
 | Eval | Run | Result at v0.7 |
 | --- | --- | --- |
-| Layout integrity | `python3 tools/check_layout.py` | 20 scripts each in one skill and mentioned; no dangling path or retired name |
+| Layout integrity | `python3 tools/check_layout.py` | 21 scripts each in one skill and mentioned; no dangling path or retired name |
 | Routing, v0.5 layout vs v0.6 layout | `python3 evals/routing.py` (add `--held-out` once, never tune on it) | dev 90% to 98% top-1, 100% top-3; every v0.5 trigger still routes (100%) |
 | Delegation: trust vs old rules vs contract-first | `python3 evals/delegation.py` (`-v` for the full log) | original contract tests passing 2 / 7 / 8 of 8; bad changes landed 4 / 1 / 0 |
 | Tamper guard | `python3 evals/tamper_guard.py` | 19 of 19 cheats flagged (15 as FAIL); 0 of 12 honest changes failed |
@@ -13,6 +13,7 @@ not agent behaviour: the cheating diffs and agent mistakes are scripted.
 | ratchet vs naive gate | `python3 evals/ratchet_vs_naive.py` | ratchet 7 of 7 correct; naive gate 2 of 7 |
 | Guidance coverage and defect reachability | `python3 evals/guidance_coverage.py` | rubric 6/6 core, 2/4 extended, 10/10 defects reachable; superpowers 2/6, 1/4, 3/10 |
 | Code quality: does a green suite mean correct code? | `python3 evals/code_quality.py` (`-v` to name each hidden failure) | 6 of 6 candidates pass their own suite; 3 are wrong; 10 hidden defects would have shipped. Mutation score does **not** separate them |
+| Skill triggers: does each skill catch its own prompts? | `python3 skills/forge/scripts/skill_check.py --all` | 140 of 140 trigger prompts (3 should and 2 should-not for all 28 skills) route correctly, every "should" as the top pick; no dev or legacy case regresses against the base |
 | Review pack: what no reviewer has to find by reading | `python3 evals/review_eval.py` (`-v` for every finding) | the clean implementation of a plan gives 0 findings; 9 of 9 planted defects named (interface renamed or re-parameterised, planned test renamed or changed, file outside the plan, planned file untouched, test skipped, secret, debugger) |
 | Plan check: would a cold executor be stopped? | `python3 evals/plan_eval.py` (`-v` for every finding) | 19 of 19 planted plan defects caught, each for its own reason; the clean plan passes, its tests are red before their code, and executed cold all 3 PASS commands pass |
 | Flake finder: the earlier test that breaks another | `python3 evals/flake_finder.py` (`-v` for every case) | `flake.py` right on 75 of 75 cases in 544 runs; one test at a time, 60 of 75 in 4,950. At 256 tests: 11 runs vs 140 for one polluter, and every pair found |
@@ -115,6 +116,26 @@ six fixed.
 
 Concurrency and locale were deliberately left out of rubric's table rather
 than added to raise the score; `prove-it.md` states why in the file.
+
+## Skill triggers: a negative result, then a small win
+
+Advice from outside this library says a description should state when to use a
+skill, never what it does, because agents follow the summary instead of
+reading the skill. Seven rubric descriptions had such a sentence. Deleting
+them saved 14% of the always-loaded tokens and cut dev routing from 98% to 88%:
+those sentences carried trigger words. Recast as conditions, dev routing went
+to 100% - and the one held-out run showed part routing falling from 85% to 77%
+and top-3 from 90% to 88%. That is fitting the dev set, so every one of those
+edits was reverted. The claim about agents may still hold; this router cannot
+test it, and deleting the words costs routing that can be measured.
+
+Then 140 fresh trigger prompts, written per skill and checked to share nothing
+with the held-out set, found two misroutes ("Postgres EXPLAIN shows a seq
+scan" went to `mongo-index`; "tell the team the bug is fixed" went to
+`observe`) and two weak ranks. Four edits of a few words each fixed them with no
+case regressing: dev top-1 98% to 100%, legacy 100%, held-out top-1 unchanged
+and top-3 90% to 93%, for 14 more always-loaded tokens. `skill_check.py` now
+runs all of this on every change, and CI runs it on every skill.
 
 ## Review pack: facts before judgement
 

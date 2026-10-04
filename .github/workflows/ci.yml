@@ -20,6 +20,8 @@ jobs:
         run: python3 tools/lint_skills.py
       - name: Layout check
         run: python3 tools/check_layout.py
+      - name: Skill check - triggers route, no routing case regresses
+        run: python3 skills/forge/scripts/skill_check.py --all
       - name: Unit tests
         run: python3 -m unittest discover -s tests -v
       - name: vibe-check (changes in this PR or push)
