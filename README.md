@@ -223,7 +223,7 @@ Each skill opens with a short table of situations pointing to a single reference
 
 ### Scripts
 
-Twenty scripts carry the deterministic work. Eighteen run standalone and print a compact summary; `mutate.py` and `backends.py` are imported by `loop.py` and `log_fetch.py`. The commands you invoke directly:
+Twenty-one scripts carry the deterministic work. Nineteen run standalone and print a compact summary; `mutate.py` and `backends.py` are imported by `loop.py` and `log_fetch.py`. The commands you invoke directly:
 
 ```bash
 kubectl logs pod/api-7d9f --previous | python3 skills/debug/scripts/log_trace.py --repo .

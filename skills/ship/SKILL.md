@@ -1,6 +1,6 @@
 ---
 name: ship
-description: Use when about to commit, push or open a PR, say work is done, fixed or passing, merge, deploy, release (migrations, config and flag changes) or roll back. Runs the quality gate, requires proof from commands actually run this session, then deploys to staging and production while watching health signals.
+description: Use when about to commit, push or open a PR, say or tell the team that work is done, fixed or passing, merge, deploy, release (migrations, config and flag changes) or roll back. Runs the quality gate, requires proof from commands actually run this session, then deploys to staging and production while watching health signals.
 ---
 
 # ship

@@ -1,6 +1,6 @@
 ---
 name: firefight
-description: Use when production is down or degraded, an alert fires, users report an outage, or an incident needs a postmortem.
+description: Use when production is down or degraded, an alert fires or the error rate spikes, users report an outage, or an incident needs a postmortem.
 ---
 
 # firefight

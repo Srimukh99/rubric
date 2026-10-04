@@ -1,6 +1,6 @@
 ---
 name: pg-explain
-description: Use when a Postgres query is slow, an endpoint is slow because of SQL, or you are adding a query against a large table. Reads the plan and fixes the cause with measured before and after timings.
+description: Use when a Postgres query is slow or EXPLAIN shows a sequential scan, an endpoint is slow because of SQL, or you are adding a query against a large table. Reads the plan and fixes the cause with measured before and after timings.
 ---
 
 # pg-explain
