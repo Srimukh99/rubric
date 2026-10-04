@@ -5,7 +5,7 @@ not agent behaviour: the cheating diffs and agent mistakes are scripted.
 
 | Eval | Run | Result at v0.7 |
 | --- | --- | --- |
-| Layout integrity | `python3 tools/check_layout.py` | 17 scripts each in one skill and mentioned; no dangling path or retired name |
+| Layout integrity | `python3 tools/check_layout.py` | 18 scripts each in one skill and mentioned; no dangling path or retired name |
 | Routing, v0.5 layout vs v0.6 layout | `python3 evals/routing.py` (add `--held-out` once, never tune on it) | dev 90% to 98% top-1, 100% top-3; every v0.5 trigger still routes (100%) |
 | Delegation: trust vs old rules vs contract-first | `python3 evals/delegation.py` (`-v` for the full log) | original contract tests passing 2 / 7 / 8 of 8; bad changes landed 4 / 1 / 0 |
 | Tamper guard | `python3 evals/tamper_guard.py` | 19 of 19 cheats flagged (15 as FAIL); 0 of 12 honest changes failed |

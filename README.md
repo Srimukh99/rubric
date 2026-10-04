@@ -129,7 +129,7 @@ design → build (ratchet, delegate) → review → ship
 something breaks: debug (logs → source line → cause → fix)        outage: firefight
 ```
 
-1. **design** — Activates on a feature or behaviour change with nothing specced. Turns the ask into an agreed design, then into tasks small enough to verify, each with exact files and checks.
+1. **design** — Activates on a fuzzy idea, or a feature or behaviour change with nothing specced. Sizes the ask first — probe, bounded or structural — and scales the work to it: a conversation, a four-line design, or a design file that `spec_check.py` checks before you approve it. Draws in Mermaid when a choice is easier to see than read. Then breaks the work into tasks small enough to verify, each with exact files and checks.
 
 2. **build** — Activates once a plan exists. Creates an isolated worktree, runs a test-first loop built for agent speed, and escalates checks in tiers: typecheck and lint on every edit, related tests when those pass, the full suite before done.
 
@@ -223,7 +223,7 @@ Each skill opens with a short table of situations pointing to a single reference
 
 ### Scripts
 
-Seventeen scripts carry the deterministic work. Fifteen run standalone and print a compact summary; `mutate.py` and `backends.py` are imported by `loop.py` and `log_fetch.py`. The commands you invoke directly:
+Eighteen scripts carry the deterministic work. Sixteen run standalone and print a compact summary; `mutate.py` and `backends.py` are imported by `loop.py` and `log_fetch.py`. The commands you invoke directly:
 
 ```bash
 kubectl logs pod/api-7d9f --previous | python3 skills/debug/scripts/log_trace.py --repo .
@@ -233,6 +233,7 @@ python3 skills/debug/scripts/log_fetch.py notification-service --since 2h
 python3 skills/debug/scripts/flake.py polluter tests/test_cart.py::test_total   # the earlier test that breaks it
 python3 skills/debug/scripts/flake.py rate tests/test_cart.py::test_total -n 20  # how often it fails alone
 python3 skills/legal-traps/scripts/legal_traps.py .
+python3 skills/design/scripts/spec_check.py docs/designs/2026-10-04-retry.md  # before asking for approval
 python3 skills/build/scripts/loop.py fast                # then focused, then full
 python3 skills/build/scripts/loop.py mutate              # inject bugs; report the ones no test catches
 python3 skills/build/scripts/tamper.py                   # catch skipped, deleted or weakened tests

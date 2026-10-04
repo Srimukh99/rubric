@@ -1,6 +1,8 @@
 # blueprint
 
-Write the plan for a capable engineer who has never seen this codebase.
+Write the plan for a capable engineer who has never seen this codebase. For a
+bounded change, the four-line design from `references/shape.md` is the plan;
+skip this file.
 
 ## Each task has
 
