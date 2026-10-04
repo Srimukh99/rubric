@@ -1,13 +1,25 @@
 # Changelog
 
 ## 0.8.0
-- `forge` now builds a skill the way the library builds code: decide whether it
-  is a script, an `AGENTS.md` line or a skill; write the description as a
-  condition in the words people type; match the form to the observed failure
-  (a skipped rule, the wrong shape, a missing part, a condition); prove the
-  triggers, the routing and, where agents can be run, the behaviour. Its format
-  section now describes the library as it is.
-- New script, `forge/scripts/skill_check.py`: routes each changed skill's
+- `forge` now writes any skill, for any agent or project, not only rubric's.
+  `references/write.md`: decide whether it is a script, an `AGENTS.md` line or a
+  skill; its type (discipline, technique, pattern, reference), each written
+  and tested differently; the description as a condition, with weak and strong
+  examples; the body; the form that fits the observed failure; closing the
+  loopholes a tested agent found. `references/test.md`: pressure scenarios
+  written first, a baseline without the skill, runs with it, twice, and a
+  report. `references/library.md`: rubric's own rules on top.
+- New script, `forge/scripts/skill_check.py`. On any skill folder, anywhere:
+  name and folder, the description, length, links to files that exist,
+  scripts it names, placeholders, "Done when", and with `--triggers` the
+  prompts routed against the skills beside it (top pick or FAIL). A
+  planted-defect comparison against a written skill-authoring checklist found
+  four gaps, all now FAIL: a workflow inside the description, a "what it
+  does" sentence, a clause that reopens a rule ("unless it matters"), and a
+  hard rule with no excuse table, red flags or baseline. Inside rubric only
+  new violations FAIL; ones a skill already had stay WARN. `new NAME
+  --type T` scaffolds a skill whose slots FAIL the check until filled. Inside
+  rubric it also routes each changed skill's
   trigger prompts from the new `evals/skill_triggers.json` (3 should, 2 should
   not, all 28 skills), FAILs any dev or legacy routing case a change breaks
   against the base, flags agent-specific tool names, WARNs on length and on
