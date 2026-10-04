@@ -1,6 +1,30 @@
 # Changelog
 
 ## 0.8.0
+- `design/references/blueprint.md` is now a plan someone who has never seen the
+  repo can execute, not interpret: a file map with one responsibility per
+  file, then tasks that carry what they cover in the design, their files, the
+  existing code to mirror, the exact signatures they consume and produce, the
+  failing test as code, the command with the reason it must fail, the
+  signature to implement, the passing run and the commit.
+- New script, `design/scripts/plan_check.py`, does mechanically what a plan
+  review otherwise asks a model to remember: every consumed name produced by
+  an earlier task or defined in the repo, with the same parameters (and a
+  "did you mean" for a typo); `modify` paths that exist and `create` paths
+  that do not; no task needing a later one; every Success and Failure-modes
+  line of the design covered; `[parallel]` tasks that share nothing; no step
+  that decides nothing; test code that parses. `--red` copies the working
+  tree, writes each task's test and runs the plan's own FAIL command, failing
+  any test that is green before its code exists. `--waves` hands `delegate`
+  the tasks that can run at once. `build` runs it before executing a plan and
+  after any change to one.
+- `shape.md` gains "Design the units": one purpose each, an interface stated
+  without the internals, testable alone, the nearest existing pattern
+  followed, and only the cleanup this change needs.
+- New eval, `evals/plan_eval.py`: 19 defects a cold executor would hit,
+  planted one at a time in a real plan, all caught for their own reason; the
+  clean plan passes, its tests are proven red, and executed cold every PASS
+  command passes.
 - `design` now starts before the ask is a feature. `shape.md` sizes it first -
   probe, bounded or structural, on named signals (a schema change, a public
   API, a new dependency, money or auth, anything a revert cannot undo) - and

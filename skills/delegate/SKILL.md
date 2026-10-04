@@ -15,7 +15,8 @@ brief yourself.
 
 1. **Contract first.** Write the shared pieces yourself: interfaces, types, and one acceptance test per
    behaviour. They are frozen for every worker.
-2. **Plan.** Run `python3 skills/delegate/scripts/team.py init --goal "..." --contract PATH` (repeat
+2. **Plan.** With a plan from `design`, `python3 skills/design/scripts/plan_check.py <plan> --waves`
+   lists which tasks can run at once: no shared file and no interface between them. Then run `python3 skills/delegate/scripts/team.py init --goal "..." --contract PATH` (repeat
    `--contract`), then for each worker
    `team.py add NAME --owns PATH --target TEST_ID --task "one line"`, then `team.py check`.
    Fix every ERROR: two workers owning the same file, a worker owning the contract, a target assigned twice.

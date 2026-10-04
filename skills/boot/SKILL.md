@@ -44,4 +44,4 @@ Install only what the work needs: `./install.sh --pack NAME`. If a task matches 
 4. Run `vibe-check` before every commit.
 5. Regulated data (health, payments, personal identifiers, money) means the matching `reg-` skill from the regulated pack applies on top of everything else.
 6. If the user explicitly says to skip a skill, skip it, and state in one line what risk that leaves.
-7. Save tokens: when a rubric script exists for the job (`loop`, `tamper`, `ratchet`, `team`, `log-fetch`, `log-trace`, `legal-traps`, `iac-check`, `crd-check`, `drift`, `deps-check`, `vibe-check`, `spec-check`, `flake`), run it and read its summary instead of reading raw logs, manifests or whole files.
+7. Save tokens: when a rubric script exists for the job (`loop`, `tamper`, `ratchet`, `team`, `log-fetch`, `log-trace`, `legal-traps`, `iac-check`, `crd-check`, `drift`, `deps-check`, `vibe-check`, `spec-check`, `plan-check`, `flake`), run it and read its summary instead of reading raw logs, manifests or whole files.

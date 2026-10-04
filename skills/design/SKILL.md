@@ -16,4 +16,4 @@ Order: `references/shape.md`, then `references/blueprint.md` once a structural d
 
 Pictures: `references/sketch.md`, when a question is easier to see than read (options side by side, call order, states, data, screen layout), in Mermaid.
 
-Script: `scripts/spec_check.py` (checks a design file before approval: placeholders, missing sections, unmeasurable success, wording that reads two ways, and Mermaid that will not render).
+Scripts: `scripts/spec_check.py` (checks a design file before approval: placeholders, missing sections, unmeasurable success, wording that reads two ways, and Mermaid that will not render), `scripts/plan_check.py` (checks a plan can be executed cold: interfaces that match across tasks and the repo, paths that exist, every design line covered; `--red` proves each test fails before its code exists; `--waves` for delegate).
