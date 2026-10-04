@@ -86,6 +86,16 @@ Every user-visible change gets a CHANGELOG entry before it is merged. See `refer
 
 No entry, no merge. A hotfix is not an exception.
 
+## Signs you are about to skip it
+
+- "It's a one-line fix"
+
+| About to be said | What is actually true |
+| --- | --- |
+| "It's a one-line fix" | Users notice one-line behaviour changes first |
+
+Baseline: without the skill, 2 of 3 agents merged a hotfix with no entry.
+
 ## Done when
 
 The pull request carries the CHANGELOG entry.
@@ -136,8 +146,8 @@ class AnyFolder(unittest.TestCase):
             ("name: changelog-first", "name: Changelog_First", "FAIL", "must be lowercase letters"),
             ("name: changelog-first", "name: changelog", "WARN", "differs from its folder"),
             ("description: Use when about", "description: Notes: use when about", "FAIL", "': ' unquoted"),
-            ("description: Use when about to merge,", "description: I help when you merge,", "WARN", "first person"),
-            ("and hotfixes.", "and hotfixes. Writes the entry and opens the PR.", "WARN", "says what the skill does"),
+            ("description: Use when about to merge,", "description: I help when you merge,", "FAIL", "first person"),
+            ("and hotfixes.", "and hotfixes. Writes the entry and opens the PR.", "FAIL", "says what the skill does"),
             ("See `references/why.md`.", "See `references/how.md`.", "FAIL", "references/how.md, which does not exist"),
             ("No entry, no merge.", "No entry, <what happens>, no merge.", "FAIL", "placeholder left in"),
             ("## Done when", "## Finally", "WARN", "no 'Done when'"),
@@ -203,3 +213,77 @@ class Scaffold(unittest.TestCase):
             self.assertEqual(SC.main(["new", "Bad_Name", "--type", "technique", "--dir", str(d)]), 2)
             SC.main(["new", "ok", "--type", "technique", "--dir", str(d)])
             self.assertEqual(SC.main(["new", "ok", "--type", "technique", "--dir", str(d)]), 2)
+
+
+class TheComparison(unittest.TestCase):
+    """The planted-defect comparison that found forge's gaps, kept as a regression test.
+
+    Each row plants one defect in an otherwise clean skill and requires a FAIL that names it.
+    """
+
+    def setUp(self):
+        self.d = pathlib.Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, self.d, True)
+        self.skill = self.d / "changelog-first"
+        (self.skill / "references").mkdir(parents=True)
+        (self.skill / "references" / "why.md").write_text("# why\n\nUsers read it.\n")
+
+    def check(self, text):
+        (self.skill / "SKILL.md").write_text(text)
+        with contextlib.redirect_stdout(io.StringIO()) as out:
+            rc = SC.main([str(self.skill)])
+        return rc, out.getvalue()
+
+    def assertFails(self, text, want):
+        rc, out = self.check(text)
+        self.assertEqual(rc, 1, out)
+        self.assertTrue(any(l.startswith("FAIL") and want in l for l in out.splitlines()), "%s:\n%s" % (want, out))
+
+    def test_description_summarizes_the_workflow(self):
+        self.assertFails(GOOD.replace("including small fixes and hotfixes.",
+                                      "including hotfixes - dispatches a subagent per change with review between tasks."),
+                         "carries a workflow")
+
+    def test_second_sentence_says_what_it_does(self):
+        self.assertFails(GOOD.replace("and hotfixes.", "and hotfixes. Fetches them from CloudWatch and writes the entry."),
+                         "says what the skill does")
+
+    def test_first_person(self):
+        self.assertFails(GOOD.replace("description: Use when about to merge,", "description: I add entries when you merge,"),
+                         "first person")
+
+    def test_hard_rule_with_no_excuses_flags_or_baseline(self):
+        bare = GOOD[:GOOD.index("## Signs you are about to skip it")] + GOOD[GOOD.index("## Done when"):]
+        hard = bare.replace("No entry, no merge. A hotfix is not an exception.",
+                            "You MUST write the entry. No exceptions. Never merge without it.")
+        for want in ("no excuse -> reality table", "no red flags", "no baseline"):
+            self.assertFails(hard, want)
+        fixed = hard.replace("## Done when", "## Signs you are about to skip it\n\n- \"It's tiny\"\n\n"
+                                               "| About to be said | What is actually true |\n| --- | --- |\n"
+                                               "| \"It's tiny\" | Tiny changes surprise users too |\n\n"
+                                               "Baseline: without the skill, 2 of 3 agents merged with no entry.\n\n## Done when")
+        self.assertEqual(self.check(fixed)[0], 0, self.check(fixed)[1])
+
+    def test_unless_it_matters(self):
+        self.assertFails(GOOD.replace("No entry, no merge.", "Don't skip the entry unless it matters."),
+                         "reopens the rule")
+
+    def test_a_quoted_example_of_the_phrase_is_not_a_use_of_it(self):
+        rc, out = self.check(GOOD.replace("No entry, no merge.", 'Never write "unless it matters" in a rule.'))
+        self.assertNotIn("reopens the rule", out)
+
+    def test_a_soft_condition_in_a_step_only_warns(self):
+        rc, out = self.check(GOOD.replace("No entry, no merge.", "Add a migration note if needed."))
+        self.assertTrue(any(l.startswith("WARN") and "leaves the decision" in l for l in out.splitlines()), out)
+
+    def test_clean_skill(self):
+        self.assertEqual(self.check(GOOD)[0], 0)
+
+
+class LibraryRatchet(unittest.TestCase):
+    def test_existing_violations_are_warnings_new_ones_fail(self):
+        """Inside rubric, a skill keeps what it already had at the base as a WARN."""
+        with contextlib.redirect_stdout(io.StringIO()) as out:
+            rc = SC.main(["--all", "--base", "HEAD"])
+        self.assertEqual(rc, 0, out.getvalue())
+        self.assertIn("already at the base", out.getvalue())

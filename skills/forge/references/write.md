@@ -87,10 +87,19 @@ For a discipline skill, every excuse a tested agent gave becomes a row:
 
 ## 7. Check it
 
-`python3 <this skill folder>/scripts/skill_check.py PATH/TO/SKILL` lints the
-skill (name and folder, description, length, links, scripts named,
-placeholders), and with `--triggers FILE` routes prompts that should and
-should not reach it against the other skills in the same folder. Then
+`python3 <this skill folder>/scripts/skill_check.py PATH/TO/SKILL` FAILs on:
+
+- a description in the first person, one that carries a workflow ("... -
+  dispatches a subagent per task"), or a sentence saying what the skill does;
+- a clause that reopens a rule ("don't skip it unless it matters");
+- a hard rule (a "The rule" heading, MUST or NEVER, "no exceptions") with no
+  excuse table, no red flags, or no recorded baseline;
+- a link to a file that is not there, a placeholder left in.
+
+It WARNs on length, a missing **Done when**, a reference or script nothing
+points at, and a soft condition in a step ("if needed"). With
+`--triggers FILE` it routes prompts that should and should not reach the
+skill against the others in the same folder: the top pick, or FAIL. Then
 `references/test.md` for behaviour.
 
 ## Done when

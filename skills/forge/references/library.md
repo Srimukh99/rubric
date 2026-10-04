@@ -26,8 +26,11 @@ library's own rules on top.
 1. Add 3 prompts that should reach the skill and 2 near-misses that should not
    to `evals/skill_triggers.json`. Never copy from the held-out routing set.
 2. `python3 skills/forge/scripts/skill_check.py` (no path) checks every changed
-   skill in the library: triggers, and every dev and legacy routing case that
-   your change breaks against the base, plus the always-loaded token change.
+   skill in the library with the same rules as any skill, plus "Use when",
+   agent-specific tool names, its triggers, every dev and legacy routing case
+   your change breaks against the base, and the always-loaded token change.
+   Only new violations FAIL: one a skill already had at the base stays a WARN
+   until someone fixes it, so the library ratchets forward.
 3. Run `python3 evals/routing.py --held-out` once, at the end. Never edit to
    improve it; a set you tune on stops measuring.
 4. `python3 tools/lint_skills.py`, `python3 tools/check_layout.py`, and a row in

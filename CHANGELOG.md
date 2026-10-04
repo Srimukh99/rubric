@@ -12,7 +12,12 @@
 - New script, `forge/scripts/skill_check.py`. On any skill folder, anywhere:
   name and folder, the description, length, links to files that exist,
   scripts it names, placeholders, "Done when", and with `--triggers` the
-  prompts routed against the skills beside it (top pick or FAIL). `new NAME
+  prompts routed against the skills beside it (top pick or FAIL). A
+  planted-defect comparison against a written skill-authoring checklist found
+  four gaps, all now FAIL: a workflow inside the description, a "what it
+  does" sentence, a clause that reopens a rule ("unless it matters"), and a
+  hard rule with no excuse table, red flags or baseline. Inside rubric only
+  new violations FAIL; ones a skill already had stay WARN. `new NAME
   --type T` scaffolds a skill whose slots FAIL the check until filled. Inside
   rubric it also routes each changed skill's
   trigger prompts from the new `evals/skill_triggers.json` (3 should, 2 should

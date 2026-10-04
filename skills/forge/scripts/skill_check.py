@@ -44,6 +44,27 @@ TOOL_NAMES = re.compile(r"\b(?:Bash|Read|Edit|Write|Glob|Grep|Task|WebFetch|Note
                         r"\bsubagent_type\b|\bmcp__\w+")
 FIRST_PERSON = re.compile(r"\b(?:I|I'm|I'll|me|my)\b")
 DOES = re.compile(r"^(?:[A-Z][a-z]+s)\b(?!\s+(?:when|if)\b)")      # "Fetches ...", "Runs ...": what it does
+PROCESS = (r"(?:runs|dispatches|writes|creates|fetches|generates|executes|reviews|checks|validates|compares|deploys|"
+           r"sends|calls|spawns|launches|invokes|walks|guides|breaks|turns|works|reads|routes|finds|tracks|settles|"
+           r"applies|produces|scans|summari[sz]es|records|loops|iterates|merges|commits|pushes|asks)")
+# A workflow inside the description: "Use when X - dispatches a subagent per task", "..., then deploys".
+WORKFLOW = re.compile(r"(?:\s[-\u2013\u2014]\s|;\s|:\s)(?:it\s+|then\s+)?" + PROCESS + r"\b|,?\s+then\s+(?:\w+\s+){0,2}"
+                      + PROCESS + r"\b", re.I)
+# A clause that reopens a rule: "unless it matters", "where appropriate", "use your judgement".
+NUANCE = re.compile(r"\bunless (?:it|this|that|you think it|absolutely)?\s*(?:really\s+)?(?:matters|is (?:important|needed|"
+                    r"necessary|worth it)|makes sense|needed)\b|\bwhere appropriate\b|\bif (?:it )?(?:makes sense|"
+                    r"appropriate|needed|necessary|reasonable)\b|\bwhen (?:it )?(?:makes sense|appropriate|reasonable)\b|"
+                    r"\bas (?:needed|appropriate)\b|\buse your (?:best )?judg(?:e)?ment\b|\bwithin reason\b", re.I)
+RULE_WORD = re.compile(r"\b(?:never|always|must|do not|don't|no exceptions|skip|required)\b", re.I)
+# A discipline skill: it makes the agent do something it knows it should, under pressure.
+RULE_HEAD = re.compile(r"^#+\s*(?:the\s+)?(?:rule|iron law|hard rule|non-negotiable|golden rule)\b", re.I | re.M)
+ABSOLUTE = re.compile(r"^\s*(?:[-*]\s+|\d+\.\s+)?(?:\*\*)?(?:never|always|do not|don't|no exceptions)\b", re.I | re.M)
+STRONG = re.compile(r"\bno exceptions\b|\bnon-negotiable\b|\bMUST\b|\bNEVER\b")
+EXCUSES = re.compile(r"^\|.*(?:excuse|rationali[sz]|about to be said|the thought|reality|what is (?:actually )?true).*\|\s*$",
+                     re.I | re.M)
+FLAGS = re.compile(r"red flag|warning sign|signs you are about to|tell-tale|stop if you|if you catch yourself|"
+                   r"words that mean|you are about to skip", re.I)
+BASELINE = re.compile(r"\bbaseline\s*:|\bbehaviou?r not tested\b|\bwithout the skill\b.{0,40}\b(?:did|failed|skipped)", re.I)
 PLACEHOLDER = re.compile(r"<[a-z][a-z0-9 ,./'-]{2,60}>|\bTBD\b|\bTODO\b|\?\?\?")
 NAME_RX = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 STOP = set("a an the to of and or for in on at by with from is are was be it this that these those as into when use "
@@ -112,9 +133,10 @@ def frontmatter(text):
 
 
 def prose(text):
-    """Text outside fenced and inline code: placeholders in examples are examples."""
+    """Text outside code and quotes: a phrase quoted as an example is not used."""
     text = re.sub(r"```.*?```", "", text, flags=re.S)
-    return re.sub(r"`[^`\n]*`", "", text)
+    text = re.sub(r"`[^`\n]*`", "", text)
+    return re.sub(r"\"[^\"\n]*\"|\u201c[^\u201d\n]*\u201d", "", text)
 
 
 def lint_folder(folder, add):
@@ -144,13 +166,19 @@ def lint_folder(folder, add):
         if not desc.strip("\"'").startswith("Use when"):
             add("WARN", "SKILL.md", "description does not start with 'Use when': state the condition for loading it")
         if FIRST_PERSON.search(desc):
-            add("WARN", "SKILL.md", "description is in the first person; write the condition, not a voice")
+            add("FAIL", "SKILL.md", "description is in the first person; write the condition, not a voice", "desc-person")
         if len(desc.split()) > 40:
             add("WARN", "SKILL.md", "description is %d words; it loads in every session (aim for 40)" % len(desc.split()))
-        for s in re.split(r"(?<=\.)\s+", desc.strip("\"'"))[1:]:
+        sentences = re.split(r"(?<=\.)\s+", desc.strip("\"'"))
+        for s in sentences[1:]:
             if DOES.match(s):
-                add("WARN", "SKILL.md", "'%s' says what the skill does, not when to use it; an agent can act on "
-                                        "this and skip the skill - recast it as a condition" % s[:50])
+                add("FAIL", "SKILL.md", "'%s' says what the skill does, not when to use it; an agent can act on "
+                                        "this and skip the skill - recast it as a condition" % s[:50], "desc-does")
+        m = WORKFLOW.search(sentences[0])
+        if m:
+            add("FAIL", "SKILL.md", "the description carries a workflow ('...%s'); an agent can follow that and never "
+                                    "open the skill - keep only when to use it" % sentences[0][max(0, m.start() - 15):m.end()],
+                "desc-workflow")
     lines = body.count("\n")
     if lines > 500:
         add("FAIL", "SKILL.md", "body is %d lines; move detail into references/ files read on demand" % lines)
@@ -177,6 +205,31 @@ def lint_folder(folder, add):
             add("WARN", "scripts/" + script.name, "is never named in the skill's text, so an agent will not run it")
     if not any(re.search(r"^#+\s*Done when", t, re.M) for t in alltext.values()):
         add("WARN", "SKILL.md", "no 'Done when': say what observable state means the job is finished")
+    for f, t in alltext.items():
+        rel = f.relative_to(folder).as_posix()
+        for sentence in re.split(r"(?<=[.!?])\s+|\n\s*\n|\n\s*[-*|]", prose(t)):
+            m = NUANCE.search(sentence)
+            if not m:
+                continue
+            if RULE_WORD.search(sentence):
+                add("FAIL", rel, "'%s' reopens the rule it sits in: a pressed agent decides it does not matter - "
+                                 "state the rule flatly" % m.group(0), "nuance-rule")
+            else:
+                add("WARN", rel, "'%s' leaves the decision to the agent; say when, concretely" % m.group(0), "nuance")
+    joined = "\n".join(alltext.values())
+    disciplined = [f for f, t in alltext.items()
+                   if RULE_HEAD.search(t) or STRONG.search(prose(t)) or len(ABSOLUTE.findall(prose(t))) >= 3]
+    if disciplined:
+        where = disciplined[0].relative_to(folder).as_posix()
+        if not EXCUSES.search(joined):
+            add("FAIL", where, "a hard rule with no excuse -> reality table: the first excuse a pressed agent finds "
+                               "wins (references/test.md, record them)", "rule-no-excuses")
+        if not FLAGS.search(prose(joined)) and not FLAGS.search(joined):
+            add("FAIL", where, "a hard rule with no red flags: list the phrases that come right before the skip",
+                "rule-no-flags")
+        if not BASELINE.search(joined):
+            add("FAIL", where, "a hard rule with no baseline: record what an agent did without the skill "
+                               "('Baseline: ...'), or say 'behaviour not tested'", "rule-no-baseline")
     return name or folder.name, desc
 
 
@@ -214,7 +267,7 @@ def check_path(a):
     target = pathlib.Path(a.target).resolve()
     folder = target.parent if target.name == "SKILL.md" else target
     findings = []
-    add = lambda level, where, msg: findings.append((level, where, msg))
+    add = lambda level, where, msg, key=None: findings.append((level, where, msg))
     name, desc = lint_folder(folder, add)
     if name and a.triggers:
         data = json.loads(pathlib.Path(a.triggers).read_text(encoding="utf-8"))
@@ -357,19 +410,24 @@ def check_library(argv):
     triggers = json.loads(TRIGGERS.read_text()) if TRIGGERS.exists() else {}
     docs, _ = R.load_new(ROOT)
     idx = R.Index(docs)
+    old_root = base_tree(base)
     for n in sorted(targets & set(now)):
+        folder = now[n].parent
+        # The same rules as any skill anywhere, but only new violations FAIL: a skill that already broke
+        # one at the base keeps it as a WARN, so the library ratchets forward without a rewrite.
+        found, before = [], set()
+        lint_folder(folder, lambda lv, w, m, k=None: found.append((lv, w, m, k or m)))
+        old = old_root / folder.relative_to(ROOT)
+        if (old / "SKILL.md").exists():
+            lint_folder(old, lambda lv, w, m, k=None: before.add((w, k or m)) if lv == "FAIL" else None)
+        for lv, w, m, k in found:
+            if lv == "FAIL" and (w, k) in before:
+                add("WARN", n, "%s: %s (already at the base)" % (w, m))
+            else:
+                add(lv, n, "%s: %s" % (w, m))
         d = description(now[n])
         if not d.startswith("Use when"):
             add("FAIL", n, "description must start with 'Use when'")
-        if FIRST_PERSON.search(d):
-            add("FAIL", n, "description is in the first person: it is read as a condition, not as a voice")
-        words = len(d.split())
-        if words > 40:
-            add("WARN", n, "description is %d words; every word loads in every session (aim for 40)" % words)
-        for s in re.split(r"(?<=\.)\s+", d)[1:]:
-            if DOES.match(s):
-                add("WARN", n, "'%s' says what the skill does, not when to use it - recast it as a condition, "
-                               "and keep the change only if routing holds" % s[:60])
         body = "\n".join(p.read_text(encoding="utf-8") for p in [now[n]] + sorted(now[n].parent.glob("references/*.md")))
         m = TOOL_NAMES.search(body)
         if m:
@@ -392,7 +450,6 @@ def check_library(argv):
             add("WARN", n, "fewer than 3 'should' or 2 'should_not' triggers")
 
     # Regression against the base, on the shared routing sets.
-    old_root = base_tree(base)
     try:
         data = json.loads((ROOT / "evals" / "routing_cases.json").read_text())
         cases = [("dev", c) for c in data["dev"]] + [("legacy", c) for c in R.legacy_recall()]
