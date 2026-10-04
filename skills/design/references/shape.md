@@ -11,7 +11,7 @@ which in one line, with the signal that decided it. The user can overrule.
 | Size | Signals | What it gets |
 | --- | --- | --- |
 | **Probe** | A question or a "could we…": no user, outcome or shape yet | Talk it through. A throwaway prototype may answer a question; it is deleted, never merged. Ends in findings and a recommendation, or a promotion to bounded or structural |
-| **Bounded** | One component, behaviour already clear, nothing below changes, a revert undoes it | Steps 2–3 briefly, then a four-line design in the reply. One yes. No file |
+| **Bounded** | One component, behaviour already clear, nothing below changes, a revert undoes it | Steps 2–4 briefly, then a four-line design in the reply. One yes. No file |
 | **Structural** | Any one of: a new service or module boundary; a schema or data migration; a public API or contract; a new dependency or vendor; auth, money or regulated data; more than one team or service; anything a revert cannot undo | Every step below, a design file, the self-check, and approval of that file |
 
 One structural signal is enough. In doubt, size up. Re-size the moment an
@@ -65,7 +65,28 @@ When a choice is easier to see than to read (where a component sits, a flow,
 a set of states, a screen layout), draw the options side by side and ask which.
 `references/sketch.md` has the diagram for each kind of question.
 
-## 4. Write the design at its size
+## 4. Design the units
+
+Before writing the design down, cut the work into units and give each a
+one-line contract:
+
+- **One purpose per unit.** If its description needs "and", it is two units.
+- **An interface you can state without the internals**: what goes in, what
+  comes out, what it may fail with. Someone using it should never need to read
+  its body, and its body should be free to change without them noticing.
+- **Testable alone**: through that interface, with only slow or external
+  edges faked.
+- **Depend on interfaces, not on each other's insides**, and keep the arrows
+  pointing one way.
+- **Follow the nearest existing pattern.** Find the code in this repo that
+  already does something like this and name it; new code takes its shape,
+  naming and error style. Inventing a new pattern is a decision, and goes in
+  Approaches with its reason.
+- **Clean up only what this change needs.** A file you must edit that has
+  grown unwieldy may be split first, as its own step. Anything else you
+  noticed goes under Non-goals as a follow-up, not into the diff.
+
+## 5. Write the design at its size
 
 **Bounded**, in the reply:
 
@@ -101,7 +122,7 @@ Draw what has three or more moving parts, states, or related data, in Mermaid
 inside the file (`references/sketch.md`): it renders where the file is read,
 stays diffable, and is checked with the rest.
 
-## 5. Check the design before asking for approval
+## 6. Check the design before asking for approval
 
 Structural designs only. Run:
 
