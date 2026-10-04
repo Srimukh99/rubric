@@ -5,7 +5,7 @@ not agent behaviour: the cheating diffs and agent mistakes are scripted.
 
 | Eval | Run | Result at v0.7 |
 | --- | --- | --- |
-| Layout integrity | `python3 tools/check_layout.py` | 17 scripts each in one skill and mentioned; no dangling path or retired name |
+| Layout integrity | `python3 tools/check_layout.py` | 18 scripts each in one skill and mentioned; no dangling path or retired name |
 | Routing, v0.5 layout vs v0.6 layout | `python3 evals/routing.py` (add `--held-out` once, never tune on it) | dev 90% to 98% top-1, 100% top-3; every v0.5 trigger still routes (100%) |
 | Delegation: trust vs old rules vs contract-first | `python3 evals/delegation.py` (`-v` for the full log) | original contract tests passing 2 / 7 / 8 of 8; bad changes landed 4 / 1 / 0 |
 | Tamper guard | `python3 evals/tamper_guard.py` | 19 of 19 cheats flagged (15 as FAIL); 0 of 12 honest changes failed |
@@ -13,6 +13,7 @@ not agent behaviour: the cheating diffs and agent mistakes are scripted.
 | ratchet vs naive gate | `python3 evals/ratchet_vs_naive.py` | ratchet 7 of 7 correct; naive gate 2 of 7 |
 | Guidance coverage and defect reachability | `python3 evals/guidance_coverage.py` | rubric 6/6 core, 2/4 extended, 10/10 defects reachable; superpowers 2/6, 1/4, 3/10 |
 | Code quality: does a green suite mean correct code? | `python3 evals/code_quality.py` (`-v` to name each hidden failure) | 6 of 6 candidates pass their own suite; 3 are wrong; 10 hidden defects would have shipped. Mutation score does **not** separate them |
+| Flake finder: the earlier test that breaks another | `python3 evals/flake_finder.py` (`-v` for every case) | `flake.py` right on 75 of 75 cases in 544 runs; one test at a time, 60 of 75 in 4,950. At 256 tests: 11 runs vs 140 for one polluter, and every pair found |
 | Claim guard: unproven "done" claims, named vs. stopped | `python3 evals/claim_guard.py` (`--lib NAME=PATH` to score another library) | Stop hook stops 16 of 19 (9 of the first 12); 0 of 6 honest closings blocked, no loop |
 
 Every row above was re-run at v0.7. `delegation.py`, `ratchet_vs_naive.py` and
@@ -112,6 +113,31 @@ six fixed.
 
 Concurrency and locale were deliberately left out of rubric's table rather
 than added to raise the score; `prove-it.md` states why in the file.
+
+## Flake finder: fewer runs, and the pairs a scan cannot see
+
+`flake_finder.py` plants a known culprit in a throwaway unittest suite of 16,
+64 or 256 tests, five seeds per size so it sits at different positions, and
+asks two strategies to name it. `flake.py polluter` binary-searches the
+suite's own order one culprit at a time, then shrinks the answer with delta
+debugging; the baseline runs each earlier test with the victim, in order,
+until the failure shows.
+
+| | `flake.py` | one test at a time |
+| --- | --- | --- |
+| right | 75 of 75 | 60 of 75 |
+| runs, all cases | 544 | 4,950 |
+| one polluter in 256 tests | 11 runs | 140 runs |
+| a pair that only breaks the victim together | found, every size | never found |
+| victim never fails (nothing to find) | 2 runs | n runs |
+
+Two things it does not show. On a 16-test suite the scan is about as cheap (7
+runs vs 6), since a culprit near the front is found early. And every run here
+is a tiny process; on a real suite a run is the whole cost, which is the
+point, but the seconds in the table are not what a real suite would take.
+Building it found two bugs before any number was trusted: a loop that never
+raised its granularity, which hung on the pair case, and three re-runs of the
+same final answer, now shared, which cut the total from 649 runs to 544.
 
 ## Claim guard: words and enforcement, measured apart
 

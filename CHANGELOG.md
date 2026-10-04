@@ -30,6 +30,24 @@
   contradictions, untested failure modes, terms used before they are defined -
   is a checklist in `shape.md`. Routing is unchanged (dev 98% top-1, legacy
   100%); always-loaded text grew 7 tokens.
+- `debug/references/hunt.md` goes deeper where guessing starts: read the whole
+  error first; sort the repro (fails always, sometimes, only in the suite, only
+  on timing) and send each to the command that answers it; find a working twin
+  in the repo and list every difference; log each boundary once in a system of
+  several parts; keep a hypothesis ledger with ruled-out entries; count fix
+  attempts with `ratchet` so three strikes is kept by a script, not memory;
+  say when the design is the problem; handle "no single cause" without
+  stopping early; and a table of the thoughts that start a guess-and-patch
+  loop, with what is true instead.
+- New script, `debug/scripts/flake.py`. `rate` reruns a test alone and reports
+  how often it fails and with which messages. `polluter` finds the earlier
+  test(s) that break a test only in the suite, or that leave a file behind, by
+  binary search over the suite's own order with delta debugging as the
+  fallback: about log2(n) runs per culprit, and a pair that only breaks the
+  victim together is still found. `sleeps` lists fixed waits in test files.
+  pytest and unittest are detected; `--cmd` takes any runner. New eval,
+  `evals/flake_finder.py`: right on 75 of 75 cases in 544 runs, against 60 of
+  75 in 4,950 for trying earlier tests one at a time.
 - `ship/references/receipts.md` now covers the claim itself, not only the proof:
   a list of phrases that mean the command has not been run ("should work",
   "looks right", "I'm confident"), an excuse-and-reality table for the nine
